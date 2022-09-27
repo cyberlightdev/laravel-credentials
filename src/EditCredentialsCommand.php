@@ -13,7 +13,15 @@ class EditCredentialsCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'credentials:edit';
+    protected $signature = 'credentials:edit {--t|timeout=60 : Override the editor process timeout length (in seconds)}';
+
+    /**
+     * @param string $signature
+     */
+    public function setSignature(string $signature): void
+    {
+        $this->signature = str_replace('60', config('credentials.timeout', 60), $signature);
+    }
 
     /**
      * The console command description.
@@ -21,6 +29,7 @@ class EditCredentialsCommand extends Command
      * @var string
      */
     protected $description = 'Encrypt and edit existing credentials. They will be decrypted after saving.';
+
 
     /**
      * The command handler.
@@ -31,6 +40,12 @@ class EditCredentialsCommand extends Command
     public function handle(Credentials $credentials)
     {
         $filename = config('credentials.file');
+
+        //add timeout override
+        $timeout = trim($this->option('timeout'));
+        if(!$timeout || !is_numeric($timeout)) {
+            $timeout = config('credentials.timeout', 60);
+        }
 
         $decrypted = $credentials->load($filename);
 
@@ -44,6 +59,7 @@ class EditCredentialsCommand extends Command
         $process = new Process([$editor, $meta['uri']]);
 
         $process->setTty(true);
+        $process->setTimeout($timeout);
         $process->mustRun();
 
         $data = json_decode(file_get_contents($meta['uri']), JSON_OBJECT_AS_ARRAY);

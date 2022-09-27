@@ -27,17 +27,34 @@ You can also specify a fallback value to be used if the credential for the speci
 $credential = credentials('my-production-token', 'my-fallback-value');
 ```
 
-With the built-in edit command, you can easily edit your existing credentials. They will be automatically encrypted after saving your changes.
+## Securely Editing The Credentials 
+With the built-in edit command, you can easily edit your existing credentials. They will be automatically encrypted after saving your changes. 
 
 ```bash
 php artisan credentials:edit
 ```
+
+### The artisan command will time out for security after 60 seconds and
+
+Optionally, you can modify the default 60-second timeout either permanently, by setting the `CREDENTIALS_TIMEOUT` variable in your .env file, or on each invocation, using the `--timeout` option.
+*We strongly advise setting the shortest timeout feasible for you.*
+
+
+```bash
+php artisan credentials:edit --timeout=300
+```
+
+*Note: If the editor is not __closed__ before the timeout occurs, __all changes will be reverted__ because the process does not provide data to encrypt in this case.*  
+
+### The default editor is vi, but
 
 Optionally, you can change the used editor by adding the following to your .env file:
 
 ```
 EDITOR=nano
 ```
+
+
 
 ![Credentials Demo](https://beyondco.de/github/credentials.gif)
 
